@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
  
 # IMPORTANT: Renamed 'mcp' to 'app' so production servers (Gunicorn/Uvicorn)
 # can find the entry point automatically.
-app = FastMCP("simple-test-server", stateless_http=True, auth=None)
+app = FastMCP("simple-test-server")
  
 @app.tool(
     description="Get the current date and time",
