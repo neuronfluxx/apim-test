@@ -14,16 +14,20 @@ import logging
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
  
 logging.basicConfig(
-    level=logging.INFO,
+    level=os.getenv("LOG_LEVEL", "INFO"),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 logger.info("Starting Simple Test MCP Server")
  
 # Initialize MCP server
-mcp = FastMCP("simple-test-server", stateless_http=True, auth=None, host="0.0.0.0")
+mcp = FastMCP(os.getenv("SERVER_NAME", "simple-test-server"))
  
  
 @mcp.tool(
@@ -133,8 +137,8 @@ def health() -> dict:
    
     return {
         "status": "ok",
-        "server_name": "simple-test-server",
-        "version": "1.0.0",
+        "server_name": os.getenv("SERVER_NAME", "simple-test-server"),
+        "version": os.getenv("SERVER_VERSION", "1.0.0"),
         "timestamp": datetime.now().isoformat(),
         "tools_available": 4
     }
@@ -146,6 +150,12 @@ if __name__ == "__main__":
     logger.info(f"Starting Simple Test MCP server on {host}:{port}")
     logger.info("Transport mode: streamable-http")
  
+    # Get CORS settings from environment
+    cors_origins = os.getenv("CORS_ALLOW_ORIGINS", "*").split(",")
+    cors_methods = os.getenv("CORS_ALLOW_METHODS", "*").split(",")
+    cors_headers = os.getenv("CORS_ALLOW_HEADERS", "*").split(",")
+    cors_credentials = os.getenv("CORS_ALLOW_CREDENTIALS", "true").lower() == "true"
+ 
     mcp.run(
         transport="streamable-http",
         port=port,
@@ -153,10 +163,10 @@ if __name__ == "__main__":
         middleware=[
             Middleware(
                 CORSMiddleware,
-                allow_origins=["*"],
-                allow_methods=["*"],
-                allow_headers=["*"],
-                allow_credentials=True,
+                allow_origins=cors_origins,
+                allow_methods=cors_methods,
+                allow_headers=cors_headers,
+                allow_credentials=cors_credentials,
             )
         ]
     )
