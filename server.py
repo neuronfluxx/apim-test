@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from a2wsgi import ASGIMiddleware  # Add this!
  
 # 1. Setup Logging
 logging.basicConfig(
@@ -20,7 +21,9 @@ mcp = FastMCP("simple-test-server")
 # 3. EXPORT THE CALLABLE APP FOR AZURE
 # This solves the "Application object must be callable" error by 
 # providing the underlying Starlette/ASGI application to Gunicorn.
-app = mcp.http_app()
+asgi_app = mcp.http_app()
+app = ASGIMiddleware(asgi_app)
+ 
  
 @mcp.tool(
     description="Get the current date and time",
