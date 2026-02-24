@@ -1,2 +1,5 @@
 fastmcp
+uvicorn
+gunicorn
 starlette
+ 
